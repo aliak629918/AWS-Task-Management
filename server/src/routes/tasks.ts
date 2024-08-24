@@ -50,29 +50,50 @@ router.put('/tasks/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, status } = req.body;
 
+    // Ensure at least one attribute is provided
+    if (title === undefined && status === undefined) {
+        return res.status(400).json({ error: 'At least one attribute (title or status) is required to update' });
+    }
+
+    // Prepare UpdateExpression and ExpressionAttributeValues
+    const updateExpressions: string[] = [];
+    const expressionAttributeValues: { [key: string]: any } = {};
+    const expressionAttributeNames: { [key: string]: string } = {};
+
+    if (title !== undefined) {
+        updateExpressions.push('#title = :title');
+        expressionAttributeValues[':title'] = title;
+        expressionAttributeNames['#title'] = 'title';
+    }
+
+    if (status !== undefined) {
+        updateExpressions.push('#status = :status');
+        expressionAttributeValues[':status'] = status;
+        expressionAttributeNames['#status'] = 'status';
+    }
+
+    // Construct the UpdateExpression string
+    const updateExpression = `SET ${updateExpressions.join(', ')}`;
+
     const params = {
         TableName: TABLE_NAME,
         Key: { TaskID: id },
-        UpdateExpression: 'set #title = :title, #status = :status',
-        ExpressionAttributeNames: {
-            '#title': 'title',
-            '#status': 'status',
-        },
-        ExpressionAttributeValues: {
-            ':title': title,
-            ':status': status,
-        },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: 'UPDATED_NEW',
     };
 
     try {
         const result = await dynamoDB.update(params).promise();
         res.json(result.Attributes);
-    } catch (error: unknown) {
+    } catch (error) {
         console.error("Error updating task:", error);
         res.status(500).json({ error: 'Could not update task' });
     }
 });
+
+
 
 
 router.delete('/tasks/:id', async (req: Request, res: Response) => {

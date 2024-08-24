@@ -32,8 +32,8 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
-app.use('/api', tasks_1.default); // Use the tasks router under the /api path
 app.use(express_1.default.json()); // This allows your server to parse JSON in the request body
+app.use('/api', tasks_1.default); // Use the tasks router under the /api path
 app.get('/', (req, res) => {
     res.send('Hello, World!');
 });

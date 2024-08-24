@@ -58,18 +58,32 @@ router.get('/tasks', (req, res) => __awaiter(void 0, void 0, void 0, function* (
 router.put('/tasks/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { title, status } = req.body;
+    // Ensure at least one attribute is provided
+    if (title === undefined && status === undefined) {
+        return res.status(400).json({ error: 'At least one attribute (title or status) is required to update' });
+    }
+    // Prepare UpdateExpression and ExpressionAttributeValues
+    const updateExpressions = [];
+    const expressionAttributeValues = {};
+    const expressionAttributeNames = {};
+    if (title !== undefined) {
+        updateExpressions.push('#title = :title');
+        expressionAttributeValues[':title'] = title;
+        expressionAttributeNames['#title'] = 'title';
+    }
+    if (status !== undefined) {
+        updateExpressions.push('#status = :status');
+        expressionAttributeValues[':status'] = status;
+        expressionAttributeNames['#status'] = 'status';
+    }
+    // Construct the UpdateExpression string
+    const updateExpression = `SET ${updateExpressions.join(', ')}`;
     const params = {
         TableName: TABLE_NAME,
         Key: { TaskID: id },
-        UpdateExpression: 'set #title = :title, #status = :status',
-        ExpressionAttributeNames: {
-            '#title': 'title',
-            '#status': 'status',
-        },
-        ExpressionAttributeValues: {
-            ':title': title,
-            ':status': status,
-        },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: 'UPDATED_NEW',
     };
     try {
