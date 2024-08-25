@@ -9,7 +9,6 @@ const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = 'TMS-Table';
 
 // Create a task
-// Create a task
 router.post('/tasks', async (req: Request, res: Response) => {
     const { title, status } = req.body;
     const params = {

@@ -29,13 +29,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const tasks_1 = __importDefault(require("./routes/tasks"));
 const dotenv = __importStar(require("dotenv"));
+const path_1 = __importDefault(require("path"));
 dotenv.config();
+const cors = require('cors');
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
+app.use(cors());
 app.use(express_1.default.json()); // This allows your server to parse JSON in the request body
 app.use('/api', tasks_1.default); // Use the tasks router under the /api path
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
+// Serve static files from the React app
+app.use(express_1.default.static(path_1.default.join(__dirname, '../../front-end/src')));
+// Catch-all handler to serve the React app for unknown routes
+app.get('*', (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, '../../front-end/src', 'App.tsx'));
 });
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

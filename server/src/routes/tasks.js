@@ -20,7 +20,6 @@ aws_sdk_1.default.config.update({ region: 'eu-north-1' }); // Replace with your 
 const dynamoDB = new aws_sdk_1.default.DynamoDB.DocumentClient();
 const TABLE_NAME = 'TMS-Table';
 // Create a task
-// Create a task
 router.post('/tasks', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, status } = req.body;
     const params = {
