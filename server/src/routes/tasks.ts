@@ -3,18 +3,17 @@ import { Router, Request, Response } from 'express';
 
 const router = Router();
 
-// Configure AWS SDK
-AWS.config.update({ region: 'eu-north-1' }); // Replace with your region
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
-const TABLE_NAME = 'TMS-Table';
 
-// Create a task
+AWS.config.update({ region: 'eu-north-1' }); // CHANGE THIS TO YOUR DynamoDB LOCATION
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const TABLE_NAME = 'TMS-Table'; // CHANGE THIS TO YOUR DynamoDB TABLE NAME 
+
 router.post('/tasks', async (req: Request, res: Response) => {
     const { title, status } = req.body;
     const params = {
         TableName: TABLE_NAME,
         Item: {
-            TaskID: `${Date.now()}`, // Unique ID
+            TaskID: `${Date.now()}`, 
             title,
             status,
         },
@@ -29,7 +28,6 @@ router.post('/tasks', async (req: Request, res: Response) => {
     }
 });
 
-// Get all tasks
 router.get('/tasks', async (req: Request, res: Response) => {
     const params = {
         TableName: TABLE_NAME,
@@ -37,24 +35,21 @@ router.get('/tasks', async (req: Request, res: Response) => {
 
     try {
         const data = await dynamoDB.scan(params).promise();
-        res.json(data.Items || []); // Handle case where Items might be undefined
+        res.json(data.Items || []); 
     } catch (error: unknown) {
         console.error("Error retrieving tasks:", error);
         res.status(500).json({ error: 'Could not retrieve tasks' });
     }
 });
 
-// Update a task
 router.put('/tasks/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, status } = req.body;
 
-    // Ensure at least one attribute is provided
     if (title === undefined && status === undefined) {
         return res.status(400).json({ error: 'At least one attribute (title or status) is required to update' });
     }
 
-    // Prepare UpdateExpression and ExpressionAttributeValues
     const updateExpressions: string[] = [];
     const expressionAttributeValues: { [key: string]: any } = {};
     const expressionAttributeNames: { [key: string]: string } = {};
@@ -71,7 +66,6 @@ router.put('/tasks/:id', async (req: Request, res: Response) => {
         expressionAttributeNames['#status'] = 'status';
     }
 
-    // Construct the UpdateExpression string
     const updateExpression = `SET ${updateExpressions.join(', ')}`;
 
     const params = {
@@ -107,7 +101,7 @@ router.delete('/tasks/:id', async (req: Request, res: Response) => {
         await dynamoDB.delete(params).promise();
         res.status(204).send();
     } catch (error) {
-        console.error("Error deleting task:", error); // Log the error
+        console.error("Error deleting task:", error);
         res.status(500).json({ error: 'Could not delete task' });
     }
 });

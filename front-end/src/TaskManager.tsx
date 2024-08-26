@@ -13,7 +13,6 @@ const TaskManager: React.FC = () => {
 
   // get all tasks
   useEffect(() => {
-    console.log('help me')
     axios.get('http://localhost:3001/api/tasks')
       .then((response: AxiosResponse<Task[]>) => setTasks(response.data))
       .catch((error: AxiosError) => console.error('Error fetching tasks:', error));
@@ -25,6 +24,7 @@ const TaskManager: React.FC = () => {
   };
 
   // post a new task
+  //axios.post sends the new task data to the server 
   const addTask = () => {
     axios.post('http://localhost:3001/api/tasks', newTask)
       .then((response: AxiosResponse<Task>) => setTasks([...tasks, response.data]))

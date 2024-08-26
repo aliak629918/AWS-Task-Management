@@ -35,11 +35,9 @@ const cors = require('cors');
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 app.use(cors());
-app.use(express_1.default.json()); // This allows your server to parse JSON in the request body
-app.use('/api', tasks_1.default); // Use the tasks router under the /api path
-// Serve static files from the React app
+app.use(express_1.default.json());
+app.use('/api', tasks_1.default);
 app.use(express_1.default.static(path_1.default.join(__dirname, '../../front-end/src')));
-// Catch-all handler to serve the React app for unknown routes
 app.get('*', (req, res) => {
     res.sendFile(path_1.default.join(__dirname, '../../front-end/src', 'App.tsx'));
 });

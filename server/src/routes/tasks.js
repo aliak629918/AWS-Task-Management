@@ -15,17 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
 const express_1 = require("express");
 const router = (0, express_1.Router)();
-// Configure AWS SDK
-aws_sdk_1.default.config.update({ region: 'eu-north-1' }); // Replace with your region
+aws_sdk_1.default.config.update({ region: 'eu-north-1' }); // CHANGE TO YOUR SERVER LOCATION
 const dynamoDB = new aws_sdk_1.default.DynamoDB.DocumentClient();
-const TABLE_NAME = 'TMS-Table';
-// Create a task
+const TABLE_NAME = 'TMS-Table'; // CHANGE THIS TO YOUR TABLE NAME 
 router.post('/tasks', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, status } = req.body;
     const params = {
         TableName: TABLE_NAME,
         Item: {
-            TaskID: `${Date.now()}`, // Unique ID
+            TaskID: `${Date.now()}`,
             title,
             status,
         },
@@ -39,29 +37,25 @@ router.post('/tasks', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).json({ error: 'Could not create task' });
     }
 }));
-// Get all tasks
 router.get('/tasks', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const params = {
         TableName: TABLE_NAME,
     };
     try {
         const data = yield dynamoDB.scan(params).promise();
-        res.json(data.Items || []); // Handle case where Items might be undefined
+        res.json(data.Items || []);
     }
     catch (error) {
         console.error("Error retrieving tasks:", error);
         res.status(500).json({ error: 'Could not retrieve tasks' });
     }
 }));
-// Update a task
 router.put('/tasks/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { title, status } = req.body;
-    // Ensure at least one attribute is provided
     if (title === undefined && status === undefined) {
         return res.status(400).json({ error: 'At least one attribute (title or status) is required to update' });
     }
-    // Prepare UpdateExpression and ExpressionAttributeValues
     const updateExpressions = [];
     const expressionAttributeValues = {};
     const expressionAttributeNames = {};
@@ -75,7 +69,6 @@ router.put('/tasks/:id', (req, res) => __awaiter(void 0, void 0, void 0, functio
         expressionAttributeValues[':status'] = status;
         expressionAttributeNames['#status'] = 'status';
     }
-    // Construct the UpdateExpression string
     const updateExpression = `SET ${updateExpressions.join(', ')}`;
     const params = {
         TableName: TABLE_NAME,
@@ -105,7 +98,7 @@ router.delete('/tasks/:id', (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(204).send();
     }
     catch (error) {
-        console.error("Error deleting task:", error); // Log the error
+        console.error("Error deleting task:", error);
         res.status(500).json({ error: 'Could not delete task' });
     }
 }));
